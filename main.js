@@ -1,26 +1,45 @@
 import ToyReact, { Component } from './src/ToyReact.js'
 
-const T = () => <div>TTT<span>4232<div>dsds</div></span></div>
+const T = (props) => {
+    return <div>
+        {
+            props.children
+        }
+    </div>
+}
 
 class P extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
     }
 
     render() {
         return <div name="P">
-            a<span>b</span>c<T/>
+            {this.props.children}
         </div>
     }
 }
 
 const a = (
-    <div name="d">
-        <span name="s">233
-            <div>dccdscs</div>
-            <T name="T" />
-            <P />
-        </span>
+    <div>
+        <P id="p">
+            <T>p-a</T>
+            23
+        </P>
+        <T name="a">
+            <span>T</span>
+            <span>T</span>
+            {
+                [1, 2, 3].map(v => v)
+            }
+        </T>
+        <p>1</p>
+        <span>222</span>
+        <br />
+        24232s
+        {
+            [1, 2, 3].map(v => <span>{v}</span>)
+        }
     </div>
 )
 

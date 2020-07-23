@@ -1,43 +1,74 @@
-const ToyReact = {
-    createElement(type, attributes, ...children) {
-        const Type = Object.prototype.toString.call(type).slice(8, -1)
-        let element
-        switch(Type) {
-            case 'String':
-                element = document.createElement(type)
-                break
-            case 'Function':
-                const isClass = ToyReact.Component.isPrototypeOf(type)
-                if (isClass) {
-                    const instance = new type
-                    element = instance.render()
-                } else {
-                    element = type()
-                }
-                break
-        }
-        // console.log(arguments) // TODO
-        for (let key in (attributes || {})) {
-            element.setAttribute(key, attributes[key])
-        }
+/**
+ * 从虚拟DOM(树)生成真实DOM(树)
+ * @param {Vdom} vdom
+ */
+function createElement(vdom) {
+    // 字符串 || 数字
+    if (typeof vdom === 'string' || typeof vdom === 'number') {
+        return document.createTextNode(vdom)
+    }
 
-        children.map(child => {
-            if (typeof child === 'string') {
-                element.innerHTML += child
-            } else {
-                element.appendChild(child)
-            }
-        })
+    const { tag, props, children } = vdom
+    const element = document.createElement(tag)
+    setProps(element, props)
+    children.map(createElement).map(element.appendChild.bind(element))
 
-        return element
-    },
-    Component: function() {
-    },
-    render(vdom, element) {
-        // vdom.mountTo(element)
-        element.appendChild(vdom)
+    return element
+}
+
+/**
+ * 设置DOM元素属性
+ * @param {Element} element
+ * @param {Props} props
+ */
+function setProps(element, props) {
+    for (let i in props) {
+        element.setAttribute(i, props[i])
     }
 }
 
+const ToyReact = {
+    createVdom(tag, props, ...children) {
+        const isFunction = tag instanceof Function
+        const isClassComp = isFunction && Component.isPrototypeOf(tag)
+        const isFuncComp = isFunction && !isClassComp
+
+        // 函数组件
+        if (isFuncComp) {
+            const passprops = {
+                ...(props || {}),
+                children: (children || []).flat().map(i => i),
+            }
+            return tag(passprops)
+
+            // 类组件
+        } else if (isClassComp) {
+            const passprops = {
+                ...(props || {}),
+                children: (children || []).flat().map(i => i),
+            }
+            return (new tag(passprops)).render()
+
+            // 普通DOM
+        } else {
+            return {
+                tag,
+                props: props || {},
+                children: (children || []).flat(),
+            }
+        }
+    },
+    render(vdom, root) {
+        const element = createElement(vdom)
+        root.appendChild(element)
+    }
+}
+
+function Component(props) {
+    this.props = props || {}
+}
+
 export default ToyReact
-export const Component = ToyReact.Component
+export {
+    Component,
+}
