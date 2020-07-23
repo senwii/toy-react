@@ -11,20 +11,30 @@ const T = (props) => {
 class P extends Component {
     constructor(props) {
         super(props)
+        this.state = {
+            x: 1,
+        }
+        this.onClick = (this.props.onClick || (() => {})).bind(this)
     }
 
     render() {
-        return <div name="P">
+        return <div name="P" onClick={this.onClick}>
+            {this.state.x}
             {this.props.children}
+            {this.state.x === 15 && 666}
         </div>
     }
 }
 
 const a = (
     <div>
-        <P id="p">
+        <P id="p" onClick={function() {
+            console.log(1)
+            this.setState({
+                x: this.state.x +1,
+            })
+        }}>
             <T>p-a</T>
-            23
         </P>
         <T name="a">
             <span>T</span>
