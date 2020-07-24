@@ -8,6 +8,7 @@ export function isListenerProp(propName) {
 export function getPropEventName(propName) {
     const { groups } = propName.match(regular) || {}
     let { eventname = '' } = groups || {}
-    eventname = eventname.replace(/^([A-Z])/, char => char.toLowerCase())
+    // TODO：事件名统一转成小写，包含大写字母的事件不支持
+    eventname = eventname.toLowerCase()
     return eventname
 }
