@@ -26,8 +26,67 @@ class P extends Component {
     }
 }
 
+class Square extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            value: null,
+        }
+        this.onClick = this.onClick.bind(this)
+    }
+
+    onClick() {
+        if (!this.props.onClick) {
+            return
+        }
+        if (this.state.value === null) {
+            const value = this.props.onClick()
+            this.setState({
+                value,
+            })
+        }
+    }
+
+    render() {
+        return (
+            <span
+                style={{
+                    width: '20px',
+                    height: '20px',
+                    display: 'inline-block',
+                    border: '1px solid',
+                    lineHeight: '20px',
+                    textAlign: 'center',
+                    verticalAlign: 'top',
+                }}
+                onClick={this.onClick}
+            >
+                {this.state.value}
+            </span>
+        )
+    }
+}
+
+let round = 0
+const tags = ['O', 'X']
+const getTag = round => tags[round % tags.length]
 const a = (
     <div>
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <br />
+
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <br />
+
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <Square onClick={() => getTag(round ++)} />
+        <br />
+
         <P id="p" onClick={function() {
             console.log(1)
             this.setState({

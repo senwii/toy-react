@@ -15,7 +15,7 @@ function createElement(vdom) {
 
     const { tag, props, children } = vdom
     const element = document.createElement(tag)
-    vdom.el = element
+    vdom.el = element // TODO Symbol值不能挂载属性，需要换一种关联vdom和el的方式
     setProps(element, props)
     children.map(createElement).map(element.appendChild.bind(element))
 
@@ -34,6 +34,25 @@ function setProps(element, props) {
         if (isListener) {
             const eventname = getPropEventName(i)
             element.addEventListener(eventname, props[i])
+
+        // className
+        } else if (i === 'className') {
+            element.setAttribute('class', props[i])
+
+        // style
+        } else if (i === 'style') {
+            const value = props[i]
+            const type = typeof value
+            // 样式字符串
+            if (type === 'string') {
+                element.style = style
+
+            // 样式对象
+            } else if (type === 'object') {
+                for (let i in value) {
+                    element.style[i] = value[i]
+                }
+            }
         } else {
             element.setAttribute(i, props[i])
         }
@@ -65,7 +84,7 @@ function diffVdom(oldVdom, newVdom) {
     // 替换
     const oldType = typeof oldVdom.valueOf()
     const newType = typeof newVdom.valueOf()
-    if (oldType !== newType || ((oldType === 'string' || oldType === 'number') && oldVdom !== newVdom) || oldVdom.tag !== newVdom.tag) {
+    if (oldType !== newType || ((oldType === 'string' || oldType === 'number') && oldVdom.valueOf() !== newVdom.valueOf()) || oldVdom.tag !== newVdom.tag) {
         return {
             type: PATCH_TYPES.REPLACE_NODE,
             oldVdom,
@@ -89,6 +108,9 @@ function diffVdom(oldVdom, newVdom) {
             }
         }
     }
+
+    // 没有变化
+    newVdom.el = oldVdom.el
 }
 
 /**
@@ -220,7 +242,9 @@ function patchProps(element, propsList) {
                 return
             }
             case PATCH_TYPES.UPDATE_PROP: {
-                element.setAttribute(key, value)
+                setProps(element, {
+                    [key]: value,
+                })
                 return
             }
         }
@@ -248,6 +272,12 @@ const ToyReact = {
                     break
                 case 'Boolean':
                     // memo.push(new String(child))
+                    break
+                case 'Null':
+                    memo.push(new String(''))
+                    break
+                case 'Undefined':
+                    memo.push(new String(''))
                     break
                 default:
                     memo.push(child)
@@ -277,7 +307,7 @@ const ToyReact = {
             return {
                 tag,
                 props: props || {},
-                children: children.flat(),
+                children: children.flat().map(i => i),
             }
         }
     },
